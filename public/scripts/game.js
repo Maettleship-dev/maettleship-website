@@ -151,83 +151,56 @@ function clickPlay(event) {
   sendMove(play);
 }
 
-function validMoove(player, piece, movement) {
+function validMove(player, piece, movement) {
   let isValid = true;
   player.pieces.forEach((p) => {
     if (p.id === piece.id) {
-      if (movement.type === "move") {
-        if (p.vertical && movement.selectedCase.row + p.size > 10)
-          isValid = false;
-        if (!p.vertical && movement.selectedCase.col + p.size > 10)
-          isValid = false;
-
-        let colMin, colMax, rowMin, rowMax;
-
-        if (p.vertical) {
-          colMin =
-            movement.selectedCase.col - 1 < 0
-              ? 0
-              : movement.selectedCase.col - 1;
-          colMax =
-            movement.selectedCase.col + 1 > 9
-              ? 9
-              : movement.selectedCase.col + 1;
-          rowMin =
-            movement.selectedCase.row - 1 < 0
-              ? 0
-              : movement.selectedCase.row - 1;
-          rowMax =
-            movement.selectedCase.row + p.size > 9
-              ? 9
-              : movement.selectedCase.row + p.size;
-        } else {
-          colMin =
-            movement.selectedCase.col - 1 < 0
-              ? 0
-              : movement.selectedCase.col - 1;
-          colMax =
-            movement.selectedCase.col + p.size > 9
-              ? 9
-              : movement.selectedCase.col + p.size;
-          rowMin =
-            movement.selectedCase.row - 1 < 0
-              ? 0
-              : movement.selectedCase.row - 1;
-          rowMax =
-            movement.selectedCase.row + 1 > 9
-              ? 9
-              : movement.selectedCase.row + 1;
-        }
-
-        for (let i = colMin; i <= colMax; i++) {
-          for (let j = rowMin; j <= rowMax; j++) {
-            if (
-              player.grid.cases[i][j].isShip &&
-              player.grid.cases[i][j].piece.id !== p.id
-            )
-              isValid = false;
-          }
+      let newHead = ""
+      let newTail = ""
+      if (movement.type === "move") {        
+        newHead = {x: movement.selectedCase.col, y: movement.selectedCase.row}
+        newTail = {
+          x: p.vertical ? movement.selectedCase.col : movement.selectedCase.col + p.size - 1,
+          y: p.vertical ? movement.selectedCase.row + p.size -1 : movement.selectedCase.row
         }
       } else {
-        if (p.vertical && movement.selectedCase.x + p.size > 10)
-          isValid = false;
-        if (!p.vertical && movement.selectedCase.y + p.size > 10)
-          isValid = false;
+        newHead = p.startPos
+        newTail = { x: (p.startPos.x + p.size - 1), y: p.startPos.y }
+      }
 
-        let head = p.startPos
-        let tail = { x: (p.startPos.x + p.size), y: p.startPos.y}
+      if (
+        (p.vertical && movement.selectedCase.row + p.size > 10) ||
+        (!p.vertical && movement.selectedCase.col + p.size > 10)
+      ) {
+        isValid = false;
+        return isValid;
+      }
 
-        for (let x = head.x; x <= tail.x; x++) {
-          if (
-            player.grid.cases[x][tail.y].isShip &&
-            player.grid.cases[x][tail.y].piece.id !== p.id
-          ) {
-            isValid = false
+      for (let x = Math.max(newHead.x, 0); x <= Math.min(newTail.x, 9); ++x) {
+        for (let y = Math.max(newHead.y, 0); y <= Math.min(newTail.y, 9); ++y) {
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+              let checkX = x + dx;
+              let checkY = y + dy;
+
+              if (checkX >= 0 && checkX <= 9 && checkY >= 0 && checkY <= 9) {
+                if (
+                  player.grid.cases[checkX][checkY].isShip &&
+                  player.grid.cases[checkX][checkY].piece.id !== p.id
+                ) {
+                  isValid = false;
+                  break;
+                }
+              }
+            }
+            if (!isValid) break;
           }
+          if (!isValid) break;
         }
+        if (!isValid) break;
       }
     }
-  });
+  }) 
   return isValid;
 }
 
@@ -245,7 +218,7 @@ function clickNewCase(piece) {
           p.id === piece.id &&
           p.isSelected &&
           p.isMovable &&
-          validMoove(player, piece, {
+          validMove(player, piece, {
             type: "move",
             selectedCase: selectedCase,
           })
@@ -308,7 +281,7 @@ function rotatePiece(piece) {
           p.id === piece.id &&
           p.isSelected &&
           p.isMovable &&
-          validMoove(player, piece, {
+          validMove(player, piece, {
             type: "rotation",
             selectedCase: p.startPos,
           })
