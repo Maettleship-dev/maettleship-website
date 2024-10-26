@@ -5,11 +5,65 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-        <link rel="stylesheet" href="assets/styles/global.css" />
-        <link rel="stylesheet" href="assets/styles/style.css" />
+        <link rel="stylesheet" type="text/css" href="../assets/styles/style.css"/>
+        <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" />        
         <title>Maettleship</title>
     </head>
-    <body>
+    <body class="d-flex justify-content-center align-items-center vh-100">
+    <div id="container" class="text-center">
+        
+        <!-- Game Board Container -->
+        <div class="board-container mb-4" id="game">
+            <div class="d-flex justify-content-center mb-4">
+                <div class="position-relative">
+                    <canvas id="own_board" width="301" height="301"></canvas>
+                    <button class="btn btn-info position-absolute" style="top: 50%; transform: translate(100%, -50%);" id="rotate" type="submit">
+                        Rotate
+                    </button>
+                </div>
+            </div>
+            <canvas id="ennemy_board" style="display: none;" width="301" height="301"></canvas>
+        </div>
+        
+        <div id="roomkeyHolder"></div>
+        <div id="waiting-message" class="mb-3 d-none">Waiting for opponent<span id="dots"></span></div>
+
+        <div id="queue_options">
+            <div class="mb-3">
+                <button class="btn btn-primary me-2" id="start" type="submit">
+                    Create private room
+                </button>
+                <button class="btn btn-primary" id="joinQueue" type="submit">
+                    Join matchmaking
+                </button>
+            </div>
+
+    
+            <!-- Row with "Join room" button and input field -->
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="roomKey" minlength="2" placeholder="Room key" required>
+                <button class="btn btn-primary" id="join" type="submit">
+                    Join room
+                </button>
+            </div>
+        </div>
+
+        <div id="errorHandler" class="text-danger"></div>
+
+        <p id="playerInfo" class="position-fixed bottom-0 start-0 m-3"></p>
+    </div>
+    </br>
+    <a href="/scoreboard" class="badge badge-primary">
+        see scorebaord
+    </a>
+
+        <div id="inGameNotification">
+            <h2 style="display: none;" id="play_notification">You have to play</h2>
+            <h2 style="display: none;" id="hit_notification">Hit !</h2>
+            <h2 style="display: none;" id="win_notification">WIN !</h2>
+        </div>
+
+
         <div class="modal" id="opponentLeftModal">
             <div class="modalContent" id="opponentLeftModalContent">
                 <p>Your opponent has left the game.</p>
@@ -41,62 +95,6 @@
                     <button id="goToMenuButton2" class="close">Go to menu</button>
                 </div>
             </div>
-        </div>
-
-        <div id="roomkeyHolder"></div>
-        
-        <div id="loader">
-            <button class="btn-primary" id="start" type="submit">
-                Create private room
-            </button>
-
-            <input type="text" class="input-container" id="roomKey" minlength="2" placeholder="room key" required>
-            <button class="btn-primary" id="join" type="submit">
-                Join room
-            </button>
-
-            <button class="btn-primary" id="joinQueue" type="submit">
-              Join matchmaking
-            </button>
-
-            <div id="errorHandler"></div>
-        </div>
-
-        </br>
-        </br>
-
-        <div class="board-container" id="game">
-            <canvas id="own_board" width="301" height="301"></canvas>
-            <canvas
-                id="ennemy_board"
-                style="display: none;"
-                width="301"
-                height="301"
-            ></canvas>
-        </div>
-
-        </br>
-
-        <button class="btn-primary hidden-element" id="rotate" type="submit">
-            Rotate
-        </button>
-
-        <br>
-
-        <button class="btn-primary" style="display: none;" id="validGrid" type="submit">
-            Validate !
-        </button>
-
-        <p id="playerInfo"></p>
-
-        <a href="/scoreboard">
-            see scorebaord
-        </a>
-
-        <div id="inGameNotification">
-            <h2 style="display: none;" id="play_notification">You have to play</h2>
-            <h2 style="display: none;" id="hit_notification">Hit !</h2>
-            <h2 style="display: none;" id="win_notification">WIN !</h2>
         </div>
 
         <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>

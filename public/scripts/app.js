@@ -2,6 +2,7 @@ import { drawGrid, drawEnnemyGrid, play, selectPiece } from "./game.js";
 
 export const socket = io();
 export let roomId = "";
+let intervalId;
 
 socket.on("connect", () => {
   socket.emit("first connection", socket.id)
@@ -111,16 +112,6 @@ socket.on("rematch grid", () => {
   drawGrid()
 })
 
-document.getElementById("validGrid").addEventListener('click', () => {
-  const waitChoiceModal = document.getElementById("waitChoiceModal")
-  waitChoiceModal.style.display = 'block'
-
-  socket.emit("valid grid", roomId, (response) => {
-    if (response.status === false) {
-    }
-  })
-})
-
 // #endregion rematch handling
 
 function goToMenu() {
@@ -169,14 +160,16 @@ export function sendMove(move) {
 function onCreateRoom() {
   const handler = function (event) {
     event.preventDefault();
-    const loader = document.querySelector("#loader");
+    const queue_options = document.querySelector("#queue_options");
     const roomkeyHolder = document.querySelector("#roomkeyHolder");
-    loader.style.display = 'none';
+    queue_options.style.display = 'none';
 
     socket.emit("room creation", socket.id, (response) => {
       roomId = response.roomId;
       roomkeyHolder.innerHTML += `Your room key is : <strong>` + roomId + `</strong>`;
     });
+
+    startWaitingAnimation()
   };
 
   return handler;
@@ -186,7 +179,7 @@ function onJoinQueue() {
   const handler = function(event) {
     event.preventDefault();
 
-    const loader = document.querySelector("#loader");
+    const queue_options = document.querySelector("#queue_options");
     const errorHolder = document.querySelector("#errorHandler")
 
     socket.emit("join matchmaking", socket.id, (response) => {
@@ -197,9 +190,10 @@ function onJoinQueue() {
         errorHolder.textContent = "Error : " + response.message
       } else {
         roomId = response.roomId;
-        loader.style.display = "none"
+        queue_options.style.display = "none"
       }
     });
+    startWaitingAnimation()
   }
 
   return handler;
@@ -262,6 +256,37 @@ function sendGameEnded() {
       handleError()
     }
   });
+}
+
+function startWaitingAnimation() {
+  const waitingMessage = document.getElementById("waiting-message");
+  const dots = document.getElementById("dots");
+  
+  waitingMessage.style.display = "block"; // Show the waiting message
+  waitingMessage.classList.remove("d-none");
+
+  let dotCount = 0;
+
+  intervalId = setInterval(() => {
+      dotCount = (dotCount + 1) % 4; 
+      dots.textContent = ".".repeat(dotCount);
+
+  }, 500);
+
+  return () => {
+      clearInterval(intervalId);
+      waitingMessage.style.display = "none";
+  };
+}
+
+function stopWaitingAnimation() {
+  // Clear the interval to stop the animation
+  clearInterval(intervalId);
+
+  const waitingMessage = document.getElementById("waiting-message");
+
+  // Hide the element (optionally, you can remove it if not needed again)
+  waitingMessage.style.display = "none"; // Or use waitingMessage.remove() to delete completely
 }
 
 document.getElementById('goToMenuButton').addEventListener('click', () => {
