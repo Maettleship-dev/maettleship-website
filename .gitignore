@@ -3,3 +3,7 @@ node_modules/
 nginx.conf
 nginx/
 secrets/
+.env
+.env.*
+
+!.env.example

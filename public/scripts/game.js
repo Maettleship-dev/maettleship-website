@@ -213,6 +213,18 @@ function validMoove(player, piece, movement) {
           isValid = false;
         if (!p.vertical && movement.selectedCase.y + p.size > 10)
           isValid = false;
+
+        let head = p.startPos
+        let tail = { x: (p.startPos.x + p.size), y: p.startPos.y}
+
+        for (let x = head.x; x <= tail.x; x++) {
+          if (
+            player.grid.cases[x][tail.y].isShip &&
+            player.grid.cases[x][tail.y].piece.id !== p.id
+          ) {
+            isValid = false
+          }
+        }
       }
     }
   });
